@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد DEKONT — دولار أمريكي</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #e8edf2; padding: 20px; direction: rtl; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .form-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { text-align: center; color: #0f3460; margin-bottom: 20px; font-size: 20px; }
+        .input-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+        .input-group { flex: 1; min-width: 200px; }
+        label { display: block; font-weight: bold; color: #0f3460; margin-bottom: 5px; font-size: 14px; }
+        input { width: 100%; padding: 10px; border: 2px solid #d0d7e0; border-radius: 6px; font-size: 14px; }
+        input:focus { outline: none; border-color: #0f3460; }
+        .btn { background: #0f3460; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 8px; }
+        .btn:hover { background: #16537e; }
+        .btn-pdf { background: #28a745; display: none; margin-top: 10px; }
+        .dekont { display: none; background: white; padding: 30px; border: 2px solid #0f3460; border-radius: 8px; margin-top: 20px; }
+        .dekont-header { text-align: center; border-bottom: 2px solid #0f3460; padding-bottom: 15px; margin-bottom: 15px; }
+        .bank-title { font-size: 22px; font-weight: bold; color: #0f3460; }
+        .bank-sub { font-size: 12px; color: #555; margin-top: 5px; }
+        .dekont h2 { text-align: center; font-size: 18px; color: #0f3460; margin: 10px 0; text-decoration: underline; }
+        .ref-line { text-align: left; direction: ltr; font-size: 12px; color: #666; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 13px; }
+        table td, table th { border: 1px solid #333; padding: 8px; vertical-align: middle; }
+        table th { background: #0f3460; color: white; width: 28%; text-align: center; }
+        .amount { font-size: 22px; font-weight: bold; color: #0f3460; text-align: center; padding: 10px; background: #f0f4f8; border: 1px solid #0f3460; border-radius: 6px; margin: 10px 0; }
+        .sign { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 15px; border-top: 1px dashed #999; font-size: 12px; text-align: center; }
+        .sign div { width: 30%; }
+        .verify { text-align: center; margin-top: 20px; font-size: 12px; color: #444; font-family: monospace; }
+        .footer { text-align: center; margin-top: 15px; font-size: 10px; color: #777; border-top: 1px solid #ddd; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-card">
+        <h1>🏦 مولد إشعار تحويل DEKONT — دولار أمريكي</h1>
+        <div class="input-row">
+            <div class="input-group">
+                <label>اسم المرسل 📤</label>
+                <input type="text" id="sender" placeholder="اسم المرسل">
+            </div>
+            <div class="input-group">
+                <label>اسم المستفيد 📥</label>
+                <input type="text" id="receiver" placeholder="اسم المستفيد">
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="input-group">
+                <label>المبلغ بالدولار 💰</label>
+                <input type="number" id="amount" placeholder="المبلغ">
+            </div>
+            <div class="input-group">
+                <label>العملة 💵</label>
+                <input type="text" id="currency" value="دولار أمريكي — USD ($)" readonly>
+            </div>
+        </div>
+        <button class="btn" onclick="generate()">✅ إنشاء DEKONT</button>
+        <button class="btn btn-pdf" id="pdfBtn" onclick="downloadPDF()">📄 تحويل إلى PDF ↓</button>
+    </div>
+
+    <div class="dekont" id="dekont">
+        <div class="dekont-header">
+            <div class="bank-title">🏦 بنك سورية الدولي الإسلامي — SIIB</div>
+            <div class="bank-sub">
+                دمشق — سورية | الهاتف: +963 11 222 0000 | SWIFT: SIIBSYDAXXX<br>
+                الترخيص: ١٥ / شرعية / ٢٠٠٥ — info@siib.sy
+            </div>
+        </div>
+
+        <h2>إشعار تحويل مصرفي — DEKONT</h2>
+        <div class="ref-line" id="ref"></div>
+
+        <table>
+            <tr><th colspan="2">📤 بيانات المرسل</th></tr>
+            <tr><th>الاسم الكامل</th><td id="dSender"></td></tr>
+            <tr><th>رقم الحساب</th><td id="dSenderAcc"></td></tr>
+            <tr><th>الفرع</th><td>الفرع الرئيسي — دمشق</td></tr>
+        </table>
+
+        <table>
+            <tr><th colspan="2">📥 بيانات المستفيد</th></tr>
+            <tr><th>الاسم الكامل</th><td id="dReceiver"></td></tr>
+            <tr><th>رقم الحساب</th><td id="dReceiverAcc"></td></tr>
+            <tr><th>اسم البنك</th><td>بنك سورية الدولي الإسلامي — SIIB</td></tr>
+        </table>
+
+        <table>
+            <tr><th colspan="2">💰 تفاصيل العملية</th></tr>
+            <tr><th>نوع التحويل</th><td>تحويل دولي — SWIFT</td></tr>
+            <tr><th>العملة</th><td>دولار أمريكي — USD ($)</td></tr>
+        </table>
+
+        <div class="amount" id="dAmount"></div>
+
+        <table>
+            <tr><th>المبلغ بالحروف</th><td id="dWords"></td></tr>
+            <tr><th>التاريخ والوقت</th><td id="dDateTime"></td></tr>
+            <tr><th>رقم المرجع</th><td id="dRef"></td></tr>
+            <tr><th>الحالة</th><td style="color:green; font-weight:bold;">✅ تم التنفيذ</td></tr>
+        </table>
+
+        <div class="sign">
+            <div>توقيع المرسل<br><hr style="width:80%; margin:5px auto 0;"></div>
+            <div>ختم الموظف المختص<br><hr style="width:80%; margin:5px auto 0;"></div>
+            <div>اعتماد المدير<br><hr style="width:80%; margin:5px auto 0;"></div>
+        </div>
+
+        <div class="verify">🔐 رمز التحقق: <span id="dVerify"></span> | verify.siib.sy</div>
+
+        <div class="footer">
+            © ٢٠٢٦ بنك سورية الدولي الإسلامي — نسخة أصلية — صالح إلكترونياً
+        </div>
+    </div>
+</div>
+
+<script>
+function genRandom(n) {
+    let s = '';
+    for(let i=0;i<n;i++) s += Math.floor(Math.random()*10);
+    return s;
+}
+
+function numToWords(num) {
+    if (!num) return '';
+    return `المبلغ: ${num} دولار أمريكي فقط`;
+}
+
+function generate() {
+    const sender = document.getElementById('sender').value.trim();
+    const receiver = document.getElementById('receiver').value.trim();
+    const amount = document.getElementById('amount').value;
+
+    if (!sender || !receiver || !amount) {
+        alert('⚠️ الرجاء ملء اسم المرسل والمستفيد والمبلغ!');
+        return;
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('ar-SA');
+    const timeStr = now.toLocaleTimeString('ar-SA');
+    const dateNum = now.toISOString().slice(0,10).replace(/-/g,'');
+
+    const accS = 'SIIB-' + genRandom(8);
+    const accR = 'SIIB-' + genRandom(8);
+    const ref = 'DEK-' + dateNum + '-' + genRandom(6);
+    const verify = 'SIIB-' + genRandom(4) + '-' + genRandom(4);
+
+    document.getElementById('ref').textContent = ref + ' — نسخة أصلية';
+    document.getElementById('dSender').textContent = sender;
+    document.getElementById('dReceiver').textContent = receiver;
+    document.getElementById('dSenderAcc').textContent = accS;
+    document.getElementById('dReceiverAcc').textContent = accR;
+    document.getElementById('dAmount').innerHTML = `$ ${amount} USD<br>دولار أمريكي`;
+    document.getElementById('dWords').textContent = numToWords(amount);
+    document.getElementById('dDateTime').textContent = `${dateStr} — ${timeStr}`;
+    document.getElementById('dRef').textContent = ref;
+    document.getElementById('dVerify').textContent = verify;
+
+    document.getElementById('dekont').style.display = 'block';
+    document.getElementById('pdfBtn').style.display = 'block';
+    document.getElementById('dekont').scrollIntoView({behavior:'smooth'});
+}
+
+function downloadPDF() {
+    const element = document.getElementById('dekont');
+    const refName = document.getElementById('dRef').textContent || 'DEKONT';
+    const opt = {
+        margin: 10,
+        filename: refName + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+    setTimeout(() => { alert('✅ تم حفظ الملف بصيغة PDF بنجاح! 📄'); }, 500);
+}
+</script>
+
+</body>
+</html>
